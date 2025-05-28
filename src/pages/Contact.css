@@ -1,54 +1,92 @@
-/* .contact {
-    padding: 2rem;
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+/* Contact Component Styles */
+.contact {
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: #e6f0fa; /* Light blue background to match app theme */
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contact h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.contact form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-box label {
+  font-size: 1rem;
+  color: #34495e;
+  font-weight: 500;
+}
+
+.field {
+  padding: 0.75rem;
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  font-size: 1rem;
+  color: #34495e;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.field:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+}
+
+.field.message {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.contact button {
+  background-color: #f5f5dc; /* Beige to match app buttons */
+  color: #000000;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: center;
+}
+
+.contact button:hover {
+  background-color: #e0e0c9; /* Slightly darker beige on hover */
+}
+
+.contact button:disabled {
+  background-color: #d3d3d3;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .contact {
+    padding: 1rem;
   }
-  
+
   .contact h1 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #333;
+    font-size: 1.5rem;
   }
-  
-  .input-box {
-    margin-bottom: 1.5rem;
-  }
-  
-  .input-box label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: #555;
-  }
-  
-  .input-box .field {
+
+  .contact button {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
   }
-  
-  .input-box .message {
-    height: 150px;
-    resize: vertical;
-  }
-  
-  button {
-    display: block;
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #e74c3c;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  button:hover {
-    background-color: #c0392b;
-  } */
+}

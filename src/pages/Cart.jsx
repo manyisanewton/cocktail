@@ -5,7 +5,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 import Swal from 'sweetalert2';
 import { motion } from 'framer-motion';
 import { FaTrash, FaPlus, FaMinus } from 'react-icons/fa';
-import "./Cart.css"
+import './Cart.css'; // Import the new CSS file
 
 // Initialize Stripe with a mock publishable key
 const stripePromise = loadStripe('pk_test_51R4OcUP20HvRcftIypZYsPfHTFYQosf5F3fm6CyUbkJcKENj1Tc6hE0eKyuJVzSvtwEhR6kO7snSNDcPZuUSDzy600FbXP850H');
@@ -122,7 +122,7 @@ function Cart() {
   const [showCheckout, setShowCheckout] = useState(false);
 
   useEffect(() => {
-    console.log('Current cart state:', cart); // Debug log
+    console.log('Current cart state:', cart);
     const fetchCocktailDetails = async () => {
       const details = {};
       for (const item of cart) {
@@ -149,7 +149,7 @@ function Cart() {
   }, [cart]);
 
   const totalPrice = cart.reduce(
-    (total, item) => total + item.price * item.quantity,
+    (total, item) => total + (item.price || 0) * (item.quantity || 1),
     0
   );
 
@@ -194,7 +194,7 @@ function Cart() {
               />
               <div className="cart-item-details">
                 <h3>{item.strDrink}</h3>
-                <p>Price: ${item.price.toFixed(2)}</p>
+                <p>Price: ${(item.price || 0).toFixed(2)}</p>
                 <div className="quantity-control">
                   <button
                     onClick={() => updateQuantity(item.idDrink, item.quantity - 1)}
@@ -222,7 +222,7 @@ function Cart() {
         })}
       </div>
       <div className="cart-summary">
-        <h3>Total: ${totalPrice.toFixed(2)}</h3>
+        <h3>Total: ${(totalPrice || 0).toFixed(2)}</h3>
         <div className="cart-actions">
           <button className="cart-clear-button" onClick={clearCart}>
             Clear Cart
