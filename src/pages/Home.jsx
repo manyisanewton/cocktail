@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { debounce } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -13,12 +13,13 @@ import './Home.css';
 function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [layout, setLayout] = useState('grid');
   const [allCocktails, setAllCocktails] = useState([]);
   const [currentCocktailIndex, setCurrentCocktailIndex] = useState(0);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const cocktailsPerPage = 8;
-  const { addToCart } = useCart();
+  const { addToCart, cartItems = [] } = useCart();
   const navigate = useNavigate();
+  const carouselRef = useRef(null);
 
   const fetchCocktailsByLetter = async (letter) => {
     try {
@@ -55,7 +56,7 @@ function Home() {
       const cocktails = await fetchCocktailsBySearch(searchTerm);
       return cocktails;
     } else {
-      const initialLetters = 'abcde'.split('');
+      const initialLetters = 'abcdefghi'.split(''); // Expanded to include more letters (a-i)
       const promises = initialLetters.map((letter) => fetchCocktailsByLetter(letter));
       const results = await Promise.all(promises);
       const cocktails = results.flat();
@@ -92,13 +93,11 @@ function Home() {
     }
   }, [data]);
 
-  // Define cocktails and featuredCocktails before useEffect
   const cocktails = Array.isArray(allCocktails) ? allCocktails : [];
-  const featuredCocktails = cocktails.slice(0, 5);
+  const featuredCocktails = cocktails.slice(0, 10); // Increased to 10 featured cocktails
 
-  // Carousel effect for cocktail images in the Joy section
   useEffect(() => {
-    if (featuredCocktails.length === 0) return; // Prevent running if no cocktails
+    if (featuredCocktails.length === 0 || window.innerWidth <= 768) return;
 
     const interval = setInterval(() => {
       setCurrentCocktailIndex((prevIndex) => (prevIndex + 1) % featuredCocktails.length);
@@ -130,6 +129,22 @@ function Home() {
     });
   };
 
+  const handlePrevClick = () => {
+    if (carouselIndex > 0) {
+      setCarouselIndex((prev) => prev - 1);
+      const itemWidth = carouselRef.current.querySelector('.home-carousel-item').offsetWidth + 24;
+      carouselRef.current.scrollBy({ left: -itemWidth, behavior: 'smooth' });
+    }
+  };
+
+  const handleNextClick = () => {
+    if (carouselIndex < featuredCocktails.length - 1) {
+      setCarouselIndex((prev) => prev + 1);
+      const itemWidth = carouselRef.current.querySelector('.home-carousel-item').offsetWidth + 24;
+      carouselRef.current.scrollBy({ left: itemWidth, behavior: 'smooth' });
+    }
+  };
+
   const indexOfLastCocktail = currentPage * cocktailsPerPage;
   const indexOfFirstCocktail = indexOfLastCocktail - cocktailsPerPage;
   const currentCocktails = cocktails.slice(indexOfFirstCocktail, indexOfLastCocktail);
@@ -137,66 +152,27 @@ function Home() {
 
   return (
     <main className="main-content">
-      <motion.section
-        className="home-hero-section"
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h1>Sip, Savor, Celebrate</h1>
-        <p>Discover Your Perfect Cocktail for Every Moment!</p>
-      </motion.section>
-
-      <section className="home-featured-cocktails">
-        <h2>Featured Cocktails</h2>
-        <div className="home-cocktail-carousel">
-          {error ? (
-            <p>Error loading cocktails: {error.message}</p>
-          ) : isLoading ? (
-            <p>Loading featured cocktails...</p>
-          ) : featuredCocktails.length > 0 ? (
-            featuredCocktails.map((cocktail, index) => (
-              <motion.div
-                key={cocktail.idDrink}
-                className="home-carousel-item"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.2 }}
-                whileHover={{ scale: 1.05 }}
-              >
-                <img src={cocktail.strDrinkThumb} alt={cocktail.strDrink} />
-                <h3>{cocktail.strDrink}</h3>
-                <p>Price: $10</p>
-                <button
-                  className="home-add-to-cart-button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleAddToCart(cocktail);
-                  }}
-                >
-                  Add to Cart
-                </button>
-              </motion.div>
-            ))
-          ) : (
-            <p>No featured cocktails available. Try a different search!</p>
-          )}
-        </div>
-      </section>
-
       <section className="home-joy-section">
         <div className="home-joy-background">
           {featuredCocktails.length > 0 && (
-            <motion.img
-              key={currentCocktailIndex}
-              src={featuredCocktails[currentCocktailIndex].strDrinkThumb}
-              alt={featuredCocktails[currentCocktailIndex].strDrink}
-              className="home-joy-image"
+            <motion.div
+              className="home-joy-card"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 1 }}
-            />
+              whileHover={{ translateY: -5 }}
+            >
+              <motion.img
+                key={currentCocktailIndex}
+                src={featuredCocktails[currentCocktailIndex].strDrinkThumb}
+                alt={featuredCocktails[currentCocktailIndex].strDrink}
+                className="home-joy-image"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+              />
+            </motion.div>
           )}
           <div className="home-joy-overlay">
             <motion.div
@@ -222,6 +198,69 @@ function Home() {
         </div>
       </section>
 
+      <motion.section
+        className="home-hero-section"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <h1>Sip, Savor, Celebrate</h1>
+        <p>Discover Your Perfect Cocktail for Every Moment!</p>
+      </motion.section>
+
+      <section className="home-featured-cocktails">
+        <h2>Featured Cocktails</h2>
+        <div className="carousel-wrapper">
+          <button
+            className="carousel-nav prev"
+            onClick={handlePrevClick}
+            disabled={carouselIndex === 0}
+          >
+            ←
+          </button>
+          <div className="home-cocktail-carousel" ref={carouselRef}>
+            {error ? (
+              <p>Error loading cocktails: {error.message}</p>
+            ) : isLoading ? (
+              <p>Loading featured cocktails...</p>
+            ) : featuredCocktails.length > 0 ? (
+              featuredCocktails.map((cocktail, index) => (
+                <motion.div
+                  key={cocktail.idDrink}
+                  className="home-carousel-item"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.2 }}
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <img src={cocktail.strDrinkThumb} alt={cocktail.strDrink} />
+                  <h3>{cocktail.strDrink}</h3>
+                  <p>Price: $10</p>
+                  <button
+                    className="home-add-to-cart-button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAddToCart(cocktail);
+                    }}
+                  >
+                    Add to Cart
+                  </button>
+                </motion.div>
+              ))
+            ) : (
+              <p>No featured cocktails available. Try a different search!</p>
+            )}
+          </div>
+          <button
+            className="carousel-nav next"
+            onClick={handleNextClick}
+            disabled={carouselIndex >= featuredCocktails.length - 1}
+          >
+            →
+          </button>
+        </div>
+      </section>
+
       <div className="home-search-bar">
         <input
           type="text"
@@ -234,10 +273,7 @@ function Home() {
         setSearchTerm(term);
         setCurrentPage(1);
       }} />
-      <div className="home-layout-toggle">
-        <button onClick={() => setLayout('grid')}>Grid View</button>
-        <button onClick={() => setLayout('list')}>List View</button>
-      </div>
+      {/* Removed home-layout-toggle */}
 
       {error ? (
         <div className="home-loading">Error loading cocktails: {error.message}</div>
@@ -251,7 +287,7 @@ function Home() {
         <div className="home-loading">No cocktails found. Try a different search!</div>
       ) : (
         <>
-          <CocktailGrid cocktails={currentCocktails} layout={layout} />
+          <CocktailGrid cocktails={currentCocktails} />
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -259,6 +295,11 @@ function Home() {
           />
         </>
       )}
+      <div className="cart-icon">
+        <button onClick={() => navigate('/cart')}>
+          Cart {cartItems.length > 0 && <span className="cart-count">{cartItems.length}</span>}
+        </button>
+      </div>
     </main>
   );
 }
