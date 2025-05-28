@@ -18,7 +18,7 @@ function Navbar({ fetchCocktails }) {
       transition={{ duration: 0.5 }}
       className="navbar"
     >
-      <div className="navbar-brand">Cocktail Haven</div>
+      <div className="navbar-brand">Cocktail one stop</div>
       <ul className={`nav-links ${menuOpen ? 'active' : ''}`}>
         <li><Link to="/" onClick={() => { fetchCocktails('https://www.thecocktaildb.com/api/json/v1/1/filter.php?a=Alcoholic'); setMenuOpen(false); }}>Alcoholic</Link></li>
         <li><Link to="/" onClick={() => { fetchCocktails('https://www.thecocktaildb.com/api/json/v1/1/filter.php?a=Non_Alcoholic'); setMenuOpen(false); }}>Non-Alcoholic</Link></li>
